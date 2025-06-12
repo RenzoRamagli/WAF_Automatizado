@@ -1,1 +1,88 @@
+#!/bin/bash
+set -e
 
+ntpdate pool.ntp.org
+
+apt update -y
+apt upgrade -y
+
+apt-get install apache2 -y
+apt-get install libapache2-mod-security2 -y
+
+mv /etc/modsecurity/modsecurity.conf{-recommended,}
+
+# Cambiar SecRuleEngine de DetectionOnly a On
+sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/modsecurity/modsecurity.conf
+# Cambiar SecRequestBodyAccess de On a Off
+sed -i 's/SecRequestBodyAccess On/SecRequestBodyAccess Off/' /etc/modsecurity/modsecurity.conf
+# Cambiar SecRequestBodyLimit a 131072
+sed -i 's/SecRequestBodyLimit 13107200/SecRequestBodyLimit 131072/' /etc/modsecurity/modsecurity.conf
+# Cambiar SecRequestBodyNoFilesLimit a 131072
+sed -i 's/SecRequestBodyNoFilesLimit 13107200/SecRequestBodyNoFilesLimit 131072/' /etc/modsecurity/modsecurity.conf
+
+a2enmod proxy
+a2enmod proxy_http
+a2enmod headers
+systemctl restart apache2
+
+# Comentar las líneas de ServerAdmin y DocumentRoot
+sed -i 's/^ServerAdmin/#ServerAdmin/' /etc/apache2/sites-available/000-default.conf
+sed -i 's/^DocumentRoot/#DocumentRoot/' /etc/apache2/sites-available/000-default.conf
+
+# Agregar las configuraciones de Proxy
+echo "        ProxyPreserveHost On" >> /etc/apache2/sites-available/000-default.conf
+echo "        ProxyPass / http://192.168.30.5/" >> /etc/apache2/sites-available/000-default.conf
+echo "        ProxyPassReverse / http://192.168.30.5/" >> /etc/apache2/sites-available/000-default.conf
+
+sudo systemctl restart apache2
+
+
+# Crea el archivo /etc/modsecurity/user_agents.txt:
+echo -e "curl\nwget\npython-requests\nsqlmap\nlibwww\nnmap\nnikto\napachebench" > /etc/modsecurity/user_agents.txt
+
+#########
+
+# Crea el archivo /etc/modsecurity/palabras_spam.txt:
+echo -e "compra\ndinero\ntrabajo desde casa\nhaz clic aquí\ndinero fácil\nbitcoin gratis\ntarjeta de crédito\npeso uruguayo gratis\npromoción exclusiva\nenvío gratis\ncrédito sin costo\ndinero fácil\nganancias garantizadas\ndescuentos\nsin intereses\ngana" > /etc/modsecurity/palabras_spam.txt
+
+#########
+
+# Crear el archivo /etc/modsecurity/reglas_srd.conf y agregar el contenido completo
+echo "# Bloquear User-Agents sospechosos:
+SecRule REQUEST_HEADERS:User-Agent \"@rx (?i)(curl|wget|sqlmap|python-requests|libwww|nmap|nikto|apachebench)\" \
+    \"id:100000, \
+    phase:1, \
+    deny, \
+    status:403, \
+    t:none, \
+    msg:'User-Agent bloqueado por patrón sospechoso.', \
+    log, \
+    severity:WARNING, \
+    tag:'custom,bot,regex'\"
+
+# Limitar el número de parámetros en una petición:
+SecRule &ARGS \"@gt 20\" \
+    \"id:100001, \
+    phase:2, \
+    deny, \
+    status:403, \
+    t:none, \
+    msg:'Demasiados parámetros en la petición (>20)', \
+    log, \
+    severity:WARNING, \
+    tag:'custom,params,dos'\"
+
+# Bloquear envíos de formularios con palabras spam
+SecRule ARGS \"@pmFromFile /etc/modsecurity/palabras_spam.txt\" \
+    \"id:100004, \
+    phase:2, \
+    deny, \
+    status:403, \
+    t:none,t:lowercase, \
+    msg:'Palabras clave de spam detectadas en el formulario.', \
+    log, \
+    severity:WARNING, \
+    tag:'custom,spam,block'\"" > /etc/modsecurity/reglas_srd.conf
+
+
+sudo systemctl restart apache2
