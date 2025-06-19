@@ -16,6 +16,8 @@ curl -A "Mozilla/5.0" "http://192.168.1.104/?a=1&b=2&c=3&d=4&e=5&f=6&g=7&h=8&i=9
 # Bloqueo por palabras consideradas spam:
 curl -A "Mozilla/5.0" "http://192.168.1.104/?comentario=Gana%20dinero%20desde%20casa"
 
+curl -A "Mozilla/5.0" "http://192.168.1.104/?comentario=bitcoin%20gratis%20sin%20dinero"
+
 
 ####### OTROS BLOQUEOS ##########  
 
