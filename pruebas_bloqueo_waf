@@ -9,9 +9,9 @@ curl -A "wget" http://192.168.1.104/
 
 
 # Bloqueo de solicitud con muchos parametros: 
-curl -A "Mozilla/5.0" "http://192.168.1.104/?a=1$(for i in {1..25}; do echo -n "&param$i=$i"; done)"
+curl -A "Mozilla/5.0" "http://192.168.1.104/?a=1$(for i in {1..10}; do echo -n "&param$i=$i"; done)"
 
-curl -A "Mozilla/5.0" "http://192.168.1.104/?a=1&b=2&c=3&d=4&e=5&f=6&g=7&h=8&i=9&j=10&k=11&l=12&m=13&n=14&o=15&p=16&q=17&r=18&s=19&t=20&u=21"
+curl -A "Mozilla/5.0" "http://192.168.1.104/?a=1&b=2&c=3&d=4&e=5&f=6&g=7&h=8&i=9&j"
 
 # Bloqueo por palabras consideradas spam:
 curl -A "Mozilla/5.0" "http://192.168.1.104/?comentario=Gana%20dinero%20desde%20casa"
