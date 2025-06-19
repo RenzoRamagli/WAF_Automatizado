@@ -23,3 +23,5 @@ curl -A "Mozilla/5.0" "http://192.168.1.104/?q=<script>alert('x')</script>"
 
 # User-Agent disfrazado pero sospechoso:
 curl -A "curlbot/1.0" http://192.168.1.104/
+
+
