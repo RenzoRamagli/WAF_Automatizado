@@ -1,0 +1,25 @@
+######### REGLAS PERSONALIZADAS ############
+
+# Bloqueo de user_agents sospechosos:
+curl -A "curl" http://192.168.1.104/
+
+# Bloqueo de solicitud con muchos parametros: 
+curl -A "Mozilla/5.0" "http://192.168.1.104/?a=1$(for i in {1..25}; do echo -n "&param$i=$i"; done)"
+
+# Bloqueo por palabras consideradas spam:
+curl -A "Mozilla/5.0" "http://192.168.1.104/?comentario=Gana%20dinero%20desde%20casa"
+
+
+####### OTROS BLOQUEOS ##########  
+
+# Intento de acceso a archivo sensible (.env):
+curl -A "Mozilla/5.0" http://192.168.1.104/.env
+
+# Inyección SQL simple en la URL:
+curl -A "Mozilla/5.0" "http://192.168.1.104/?id=1%20OR%201=1"
+
+# XSS en parámetro:
+curl -A "Mozilla/5.0" "http://192.168.1.104/?q=<script>alert('x')</script>"
+
+# User-Agent disfrazado pero sospechoso:
+curl -A "curlbot/1.0" http://192.168.1.104/
