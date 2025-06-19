@@ -61,13 +61,13 @@ SecRule REQUEST_HEADERS:User-Agent \"@rx (?i)(curl|wget|sqlmap|python-requests|l
     tag:'custom,bot,regex'\"
 
 # Limitar el número de parámetros en una petición:
-SecRule &ARGS \"@gt 20\" \
+SecRule &ARGS \"@gt 8\" \
     \"id:100001, \
     phase:2, \
     deny, \
     status:403, \
     t:none, \
-    msg:'Demasiados parámetros en la petición (>20)', \
+    msg:'Demasiados parámetros en la solicitud (>8)', \
     log, \
     severity:WARNING, \
     tag:'custom,params,dos'\"
