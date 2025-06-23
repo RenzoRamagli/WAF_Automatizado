@@ -86,3 +86,9 @@ SecRule ARGS \"@pmFromFile /etc/modsecurity/palabras_spam.txt\" \
 
 
 sudo systemctl restart apache2
+
+
+# Ejecución:
+# sudo curl -sSL https://raw.githubusercontent.com/RenzoRamagli/WAF_Automatizado/refs/heads/main/waf_modsecurity -o WAF.sh
+# sudo chmod +x WAF.sh
+# sudo ./WAF.sh
